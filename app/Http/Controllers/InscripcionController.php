@@ -34,11 +34,11 @@ class InscripcionController extends Controller
             'telefono' => 'required|regex:/^\+569\d{8}$/',
             'direccion' => 'required|max:50',
             'rut' => 'required|regex:/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/|unique:datos_usuarios,rut',
-            'registro_social' => 'required|mimes:pdf,jpg,png|max:2048',
+            'registro_social' => 'required|file|mimes:pdf,jpg,png|max:2048',
             // Datos embarazo opcionales si está embarazada
             'embarazada' => 'nullable|in:si,no',
             'meses_gestacion' => 'required_if:embarazada,si|integer|min:1|max:9',
-            'carnet_gestacion' => 'required_if:embarazada,si|mimes:pdf,jpg,png|max:2048',
+            'carnet_gestacion' => 'required_if:embarazada,si|file|mimes:pdf,jpg,png|max:2048',
             // Datos menor - si tiene menor(s)
             'tiene_menor' => 'nullable|in:si,no',
             'menores' => 'required_if:tiene_menor,si|array',
@@ -106,12 +106,23 @@ class InscripcionController extends Controller
 
         return redirect()->route('inscripcion.despedida');
     }
+
+    // Listar usuarios en admin
     public function index()
     {
         $usuarios = DatosUsuario::with(['embarazada', 'menores'])->paginate(10);
 
         return view('admin', compact('usuarios'));
     }
+
+    // Mostrar formulario de edición
+    public function edit($id)
+    {
+        $usuario = DatosUsuario::findOrFail($id);
+        return view('admin_edit', compact('usuario'));
+    }
+
+    // Actualizar usuario
     public function update(Request $request, $id)
     {
         $usuario = DatosUsuario::findOrFail($id);
@@ -123,7 +134,6 @@ class InscripcionController extends Controller
             'telefono' => 'required|regex:/^\+569\d{8}$/',
             'direccion' => 'required|max:50',
             'rut' => "required|regex:/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/|unique:datos_usuarios,rut,$id",
-            // agrega reglas para archivos si es necesario
         ]);
 
         $usuario->update([
@@ -135,18 +145,40 @@ class InscripcionController extends Controller
             'rut' => $request->rut,
         ]);
 
-        return redirect()->route('admin.index')->with('success', 'Usuario actualizado');
+        return redirect()->route('admin.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-
+    // Eliminar usuario
     public function destroy($id)
     {
         $usuario = DatosUsuario::findOrFail($id);
+
+        // Opcional: eliminar archivos asociados (registro social, embarazo, menores)
+        if ($usuario->registro_social && Storage::exists($usuario->registro_social)) {
+            Storage::delete($usuario->registro_social);
+        }
+        if ($usuario->embarazada) {
+            if ($usuario->embarazada->carnet_gestacion && Storage::exists($usuario->embarazada->carnet_gestacion)) {
+                Storage::delete($usuario->embarazada->carnet_gestacion);
+            }
+            $usuario->embarazada()->delete();
+        }
+        // Eliminar archivos y registros menores
+        foreach ($usuario->menores as $menor) {
+            if ($menor->carnet_control_sano && Storage::exists($menor->carnet_control_sano)) {
+                Storage::delete($menor->carnet_control_sano);
+            }
+            if ($menor->certificado_nacimiento && Storage::exists($menor->certificado_nacimiento)) {
+                Storage::delete($menor->certificado_nacimiento);
+            }
+            $menor->delete();
+        }
+
+        // Finalmente eliminar usuario
         $usuario->delete();
+
         return redirect()->route('admin.index')->with('success', 'Usuario eliminado correctamente.');
     }
-
-
 
     // Vista despedida
     public function despedida()

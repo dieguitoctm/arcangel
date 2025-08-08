@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,10 +10,20 @@ class DatosUsuario extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nombres', 'ap_paterno', 'ap_materno', 'telefono', 'direccion', 'rut', 'registro_social'
+        'nombres',
+        'ap_paterno',
+        'ap_materno',
+        'telefono',
+        'direccion',
+        'rut',
+        'registro_social',
     ];
 
-    // Relaciones:
+    /**
+     * Relación uno a uno con embarazada
+     */
+    // app/Models/DatosUsuario.php
+
     public function embarazada()
     {
         return $this->hasOne(Embarazada::class, 'usuario_id');
@@ -22,4 +33,5 @@ class DatosUsuario extends Model
     {
         return $this->hasMany(Menor::class, 'usuario_id');
     }
+
 }

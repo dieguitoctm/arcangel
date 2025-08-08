@@ -10,12 +10,18 @@
       <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <!-- Tabla Usuarios -->
     <table class="table table-striped">
       <thead>
         <tr>
           <th>Nombres</th>
-          <th>Apellido</th>
+          <th>Apellido Paterno</th>
+          <th>Apellido Materno</th>
           <th>Teléfono</th>
+          <th>Dirección</th>
+          <th>RUT</th>
+          <th>Registro Social</th>
+          <th>Embarazada</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -23,8 +29,26 @@
         @foreach($usuarios as $usuario)
         <tr data-id="{{ $usuario->id }}">
           <td>{{ $usuario->nombres }}</td>
-          <td>{{ $usuario->ap_paterno }} {{ $usuario->ap_materno }}</td>
+          <td>{{ $usuario->ap_paterno }}</td>
+          <td>{{ $usuario->ap_materno }}</td>
           <td>{{ $usuario->telefono }}</td>
+          <td>{{ $usuario->direccion }}</td>
+          <td>{{ $usuario->rut }}</td>
+          <td>
+            @if($usuario->registro_social)
+              <a href="{{ Storage::url($usuario->registro_social) }}" target="_blank">Ver archivo</a>
+            @else
+              No hay
+            @endif
+          </td>
+          <td>
+            @if($usuario->embarazada)
+              Sí ({{ $usuario->embarazada->meses_gestacion }} meses)<br>
+              <a href="{{ Storage::url($usuario->embarazada->carnet_gestacion) }}" target="_blank">Ver carnet</a>
+            @else
+              No
+            @endif
+          </td>
           <td>
             <button class="btn btn-primary btn-sm btn-editar" data-bs-toggle="modal" data-bs-target="#editarModal"
               data-id="{{ $usuario->id }}"
@@ -44,6 +68,63 @@
     </table>
 
     {{ $usuarios->links() }}
+
+    <hr>
+
+    <!-- Tabla Menores por tutor -->
+    <h2 class="mb-3">Menores Inscritos por Tutor</h2>
+    @foreach($usuarios as $usuario)
+      <h4>Tutor: {{ $usuario->nombres }} {{ $usuario->ap_paterno }} {{ $usuario->ap_materno }}</h4>
+
+      @if($usuario->menores->count() > 0)
+      <table class="table table-bordered mb-4">
+        <thead>
+          <tr>
+            <th>Nombres</th>
+            <th>Apellido Paterno</th>
+            <th>Apellido Materno</th>
+            <th>RUT</th>
+            <th>Fecha Nacimiento</th>
+            <th>Género</th>
+            <th>Edad</th>
+            <th>Carnet Control Sano</th>
+            <th>Certificado de Nacimiento</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($usuario->menores as $menor)
+          <tr>
+            <td>{{ $menor->nombres }}</td>
+            <td>{{ $menor->ap_paterno }}</td>
+            <td>{{ $menor->ap_materno }}</td>
+            <td>{{ $menor->rut }}</td>
+            <td>{{ \Carbon\Carbon::parse($menor->fecha_nacimiento)->format('d-m-Y') }}</td>
+            <td>{{ $menor->genero }}</td>
+            <td>{{ $menor->edad }}</td>
+            <td>
+              @if($menor->carnet_control_sano)
+                <a href="{{ Storage::url($menor->carnet_control_sano) }}" target="_blank">Ver archivo</a>
+              @else
+                No hay
+              @endif
+            </td>
+            <td>
+              @if($menor->certificado_nacimiento)
+                <a href="{{ Storage::url($menor->certificado_nacimiento) }}" target="_blank">Ver archivo</a>
+              @else
+                No hay
+              @endif
+            </td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+      @else
+        <p>No hay menores registrados para este tutor.</p>
+      @endif
+
+      <hr>
+    @endforeach
 
     <!-- Modal Editar -->
     <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
