@@ -70,8 +70,22 @@ class InscripcionController extends Controller
     }
 
     // Otros métodos edit, update, destroy y despedida (igual que antes)
-    public function despedida()
+    public function despedida($usuario = null)
     {
-        return view('despedida');
+        if (!$usuario) {
+            // Si no hay usuario, redirige al inicio o muestra mensaje
+            return redirect()->route('inscripcion.bienvenida');
+        }
+
+        // Carga el usuario con sus menores
+        $usuario = DatosUsuario::with('menores')->find($usuario);
+
+        if (!$usuario) {
+            return redirect()->route('inscripcion.bienvenida')->with('error', 'Usuario no encontrado.');
+        }
+
+        $cantidadMenores = $usuario->menores->count();
+
+        return view('despedida', compact('usuario', 'cantidadMenores'));
     }
 }

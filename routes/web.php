@@ -30,10 +30,9 @@ Route::get('/menor/{usuario}', [MenorController::class, 'formulario'])
 Route::post('/menor/{usuario}', [MenorController::class, 'guardar'])
     ->name('menor.guardar');
 
-// Página de despedida
-Route::get('/despedida', [InscripcionController::class, 'despedida'])
+// Página de despedida, parámetro usuario opcional
+Route::get('/despedida/{usuario?}', [InscripcionController::class, 'despedida'])
     ->name('inscripcion.despedida');
-
 
 /*
 |--------------------------------------------------------------------------

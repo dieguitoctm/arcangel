@@ -34,8 +34,40 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Validación: mensajes ocultos por defecto */
     .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 0.875em;
+    }
+    .valid-feedback {
+        display: none;
+        color: #198754;
+        font-size: 0.875em;
+    }
+
+    /* Mostrar mensajes solo tras validación */
+    .was-validated select:invalid ~ .invalid-feedback,
+    .was-validated select:valid ~ .valid-feedback,
+    .was-validated input:invalid ~ .invalid-feedback,
+    .was-validated input:valid ~ .valid-feedback {
         display: block;
+    }
+
+    /* Estilos para inputs válidos e inválidos */
+    .was-validated select:invalid, 
+    .was-validated input:invalid {
+        border-color: #dc3545;
+        background-image: none;
+    }
+    .was-validated select:valid,
+    .was-validated input:valid {
+        border-color: #198754;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23198754' viewBox='0 0 8 8'%3e%3cpath d='M6.564 1.75L3.25 5.064 1.436 3.25 0 4.686l3.25 3.25 5-5z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
     }
 </style>
 
@@ -55,35 +87,43 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('inscripcion.guardar') }}" enctype="multipart/form-data" novalidate>
+                <form method="POST" action="{{ route('inscripcion.guardar') }}" enctype="multipart/form-data" novalidate id="form-inscripcion">
                     @csrf
 
                     {{-- NOMBRES --}}
                     <div class="mb-3">
                         <label for="nombres" class="form-label">Nombres</label>
                         <input type="text" class="form-control" id="nombres" name="nombres"
-                               value="{{ old('nombres') }}" minlength="2" maxlength="50" required>
+                               value="{{ old('nombres') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
+                        <div class="invalid-feedback">Ingrese un nombre válido (solo letras).</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- APELLIDO PATERNO --}}
                     <div class="mb-3">
                         <label for="ap_paterno" class="form-label">Apellido Paterno</label>
                         <input type="text" class="form-control" id="ap_paterno" name="ap_paterno"
-                               value="{{ old('ap_paterno') }}" minlength="2" maxlength="50" required>
+                               value="{{ old('ap_paterno') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
+                        <div class="invalid-feedback">Ingrese un apellido válido (solo letras).</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- APELLIDO MATERNO --}}
                     <div class="mb-3">
                         <label for="ap_materno" class="form-label">Apellido Materno</label>
                         <input type="text" class="form-control" id="ap_materno" name="ap_materno"
-                               value="{{ old('ap_materno') }}" minlength="2" maxlength="50" required>
+                               value="{{ old('ap_materno') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
+                        <div class="invalid-feedback">Ingrese un apellido válido (solo letras).</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- TELÉFONO --}}
                     <div class="mb-3">
                         <label for="telefono" class="form-label">Teléfono (+569XXXXXXXX)</label>
                         <input type="tel" class="form-control" id="telefono" name="telefono"
-                               value="{{ old('telefono', '+569') }}" minlength="12" maxlength="12" required>
+                               value="{{ old('telefono', '+569') }}" minlength="12" maxlength="12" required pattern="^\+569\d{8}$">
+                        <div class="invalid-feedback">Ingrese un teléfono válido en formato +569XXXXXXXX.</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- DIRECCIÓN --}}
@@ -91,6 +131,8 @@
                         <label for="direccion" class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="direccion" name="direccion"
                                value="{{ old('direccion') }}" maxlength="50" required>
+                        <div class="invalid-feedback">Ingrese una dirección (máximo 50 caracteres).</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- RUT --}}
@@ -101,6 +143,7 @@
                         <div class="invalid-feedback" id="rut-error" style="display:none;">
                             RUT inválido. Revise el formato y dígito verificador.
                         </div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- REGISTRO SOCIAL --}}
@@ -108,16 +151,20 @@
                         <label for="registro_social" class="form-label">Registro Social de Hogares</label>
                         <input type="file" class="form-control" id="registro_social" name="registro_social"
                                accept=".pdf,.jpg,.png" required>
+                        <div class="invalid-feedback">Debe subir un archivo válido (PDF/JPG/PNG).</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- ¿Está embarazada? --}}
                     <div class="mb-3">
-                        <label for="embarazada" class="form-label">¿Está embarazada?</label>
+                        <label for="embarazada" class="form-label">¿Está embarazada o solo desea agregar un niño?</label>
                         <select class="form-select" name="embarazada" id="embarazada" required>
                             <option value="" disabled selected>Seleccione</option>
-                            <option value="si">Sí</option>
-                            <option value="no">No</option>
+                            <option value="si">Sí, estoy embarazada.</option>
+                            <option value="no">No, solo deseo inscribir un niño.</option>
                         </select>
+                        <div class="invalid-feedback">Por favor, seleccione una opción.</div>
+                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
                     {{-- DATOS GESTACIÓN --}}
@@ -150,6 +197,7 @@
 <script src="https://cdn.jsdelivr.net/npm/rut.js@1.0.2/dist/rut.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form-inscripcion');
     const sel = document.getElementById('embarazada');
     const box = document.getElementById('datos-embarazo');
     const meses = document.getElementById('meses_gestacion');
@@ -210,11 +258,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (RUT.isValid(this.value)) {
             this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
             rutError.style.display = 'none';
         } else {
+            this.classList.remove('is-valid');
             this.classList.add('is-invalid');
             rutError.style.display = 'block';
         }
+    });
+
+    // Validación general Bootstrap
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
     });
 });
 </script>
