@@ -69,15 +69,80 @@ class InscripcionController extends Controller
         return view('admin', compact('usuarios'));
     }
 
-    // Otros métodos edit, update, destroy y despedida (igual que antes)
+    // Actualizar usuario
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nombres' => ['required', 'regex:/^[\pL\s]+$/u', 'min:2', 'max:50'],
+            'ap_paterno' => ['required', 'regex:/^[\pL\s]+$/u', 'min:2', 'max:50'],
+            'ap_materno' => ['required', 'regex:/^[\pL\s]+$/u', 'min:2', 'max:50'],
+            'telefono' => ['required', 'regex:/^\+569\d{8}$/'],
+            'direccion' => ['required', 'max:50'],
+            'rut' => ['required', 'regex:/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/', "unique:datos_usuarios,rut,{$id}"],
+        ], [
+            'nombres.regex' => 'Solo letras y espacios en Nombres.',
+            'ap_paterno.regex' => 'Solo letras y espacios en Apellido Paterno.',
+            'ap_materno.regex' => 'Solo letras y espacios en Apellido Materno.',
+            'telefono.regex' => 'El teléfono debe comenzar con +569 seguido de 8 números.',
+            'rut.regex' => 'El formato del RUT es inválido.',
+            'rut.unique' => 'El RUT ya está registrado en otro usuario.',
+        ]);
+
+        $usuario = DatosUsuario::findOrFail($id);
+
+        $usuario->nombres = $request->nombres;
+        $usuario->ap_paterno = $request->ap_paterno;
+        $usuario->ap_materno = $request->ap_materno;
+        $usuario->telefono = $request->telefono;
+        $usuario->direccion = $request->direccion;
+        $usuario->rut = $request->rut;
+
+        $usuario->save();
+
+        return redirect()->back()->with('success', 'Usuario actualizado correctamente.');
+    }
+
+    // Método para eliminar usuario
+    public function destroy($id)
+    {
+        $usuario = DatosUsuario::findOrFail($id);
+
+        // Opcional: borrar archivos asociados si quieres
+        if ($usuario->registro_social) {
+            Storage::delete($usuario->registro_social);
+        }
+
+        // Borrar embarazo y sus archivos asociados si existen
+        if ($usuario->embarazada) {
+            if ($usuario->embarazada->carnet_gestacion) {
+                Storage::delete($usuario->embarazada->carnet_gestacion);
+            }
+            $usuario->embarazada->delete();
+        }
+
+        // Borrar menores asociados (opcional: borrar sus archivos también)
+        foreach ($usuario->menores as $menor) {
+            if ($menor->carnet_control_sano) {
+                Storage::delete($menor->carnet_control_sano);
+            }
+            if ($menor->certificado_nacimiento) {
+                Storage::delete($menor->certificado_nacimiento);
+            }
+            $menor->delete();
+        }
+
+        $usuario->delete();
+
+        return redirect()->back()->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    // Página despedida
     public function despedida($usuario = null)
     {
         if (!$usuario) {
-            // Si no hay usuario, redirige al inicio o muestra mensaje
             return redirect()->route('inscripcion.bienvenida');
         }
 
-        // Carga el usuario con sus menores
         $usuario = DatosUsuario::with('menores')->find($usuario);
 
         if (!$usuario) {

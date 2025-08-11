@@ -36,19 +36,23 @@ Route::get('/despedida/{usuario?}', [InscripcionController::class, 'despedida'])
 
 /*
 |--------------------------------------------------------------------------
-| Rutas de administración (CRUD)
+| Rutas de administración (CRUD) sin autenticación
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('admin')->group(function () {
     Route::get('/', [InscripcionController::class, 'index'])
         ->name('admin.index');
-
-    Route::get('/{usuario}/edit', [InscripcionController::class, 'edit'])
-        ->name('admin.edit');
 
     Route::put('/{usuario}', [InscripcionController::class, 'update'])
         ->name('admin.update');
 
     Route::delete('/{usuario}', [InscripcionController::class, 'destroy'])
         ->name('admin.destroy');
+
+    Route::put('/menores/{menor}', [MenorController::class, 'update'])
+        ->name('menores.update');
+
+    Route::delete('/menores/{menor}', [MenorController::class, 'destroy'])
+        ->name('menores.destroy');
 });
