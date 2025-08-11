@@ -4,31 +4,52 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InscripcionController;
 use App\Http\Controllers\MenorController;
 
-// Página de bienvenida (inicio)
-Route::get('/', [InscripcionController::class, 'bienvenida'])->name('inscripcion.bienvenida');
+/*
+|--------------------------------------------------------------------------
+| Rutas públicas (Formulario y bienvenida)
+|--------------------------------------------------------------------------
+*/
 
-// Formulario de inscripción principal
-Route::get('/formulario', [InscripcionController::class, 'formulario'])->name('inscripcion.formulario');
-Route::post('/guardar', [InscripcionController::class, 'guardar'])->name('inscripcion.guardar');
+// Página de bienvenida
+Route::get('/', [InscripcionController::class, 'bienvenida'])
+    ->name('inscripcion.bienvenida');
 
-// Página despedida tras registro exitoso
-Route::get('/despedida', [InscripcionController::class, 'despedida'])->name('inscripcion.despedida');
+// Formulario de inscripción de tutor (usuario + embarazo)
+Route::get('/formulario', [InscripcionController::class, 'formulario'])
+    ->name('inscripcion.formulario');
 
-// Rutas para administración (CRUD de usuarios)
-Route::get('/admin', [InscripcionController::class, 'index'])->name('admin.index');
-Route::get('/admin/{usuario}/edit', [InscripcionController::class, 'edit'])->name('admin.edit');
-Route::put('/admin/{usuario}', [InscripcionController::class, 'update'])->name('admin.update');
-Route::delete('/admin/{usuario}', [InscripcionController::class, 'destroy'])->name('admin.destroy');
+// Guardar tutor (usuario + embarazo)
+Route::post('/formulario', [InscripcionController::class, 'guardar'])
+    ->name('inscripcion.guardar');
 
-// Flujo inscripción (opcional duplicado, si quieres separar rutas con prefijo)
-Route::prefix('inscripcion')->group(function () {
-    Route::get('/bienvenida', [InscripcionController::class, 'bienvenida'])->name('inscripcion.bienvenida');
-    Route::get('/formulario', [InscripcionController::class, 'formulario'])->name('inscripcion.formulario');
-    Route::post('/guardar', [InscripcionController::class, 'guardar'])->name('inscripcion.guardar');
+// Formulario para agregar menor(es) ligado(s) a un tutor (usuario)
+Route::get('/menor/{usuario}', [MenorController::class, 'formulario'])
+    ->name('menor.formulario');
 
-    // Registro de menores ligados a un usuario (tutor)
-    Route::get('/menor/{usuario_id}', [MenorController::class, 'formulario'])->name('menor.formulario');
-    Route::post('/menor/{usuario_id}', [MenorController::class, 'guardar'])->name('menor.guardar');
+// Guardar menor ligado a tutor (usuario)
+Route::post('/menor/{usuario}', [MenorController::class, 'guardar'])
+    ->name('menor.guardar');
 
-    Route::get('/despedida', [InscripcionController::class, 'despedida'])->name('inscripcion.despedida');
+// Página de despedida
+Route::get('/despedida', [InscripcionController::class, 'despedida'])
+    ->name('inscripcion.despedida');
+
+
+/*
+|--------------------------------------------------------------------------
+| Rutas de administración (CRUD)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->group(function () {
+    Route::get('/', [InscripcionController::class, 'index'])
+        ->name('admin.index');
+
+    Route::get('/{usuario}/edit', [InscripcionController::class, 'edit'])
+        ->name('admin.edit');
+
+    Route::put('/{usuario}', [InscripcionController::class, 'update'])
+        ->name('admin.update');
+
+    Route::delete('/{usuario}', [InscripcionController::class, 'destroy'])
+        ->name('admin.destroy');
 });

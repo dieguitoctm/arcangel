@@ -4,13 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    public function up()
+return new class extends Migration {
+    public function up(): void
     {
         Schema::create('menores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('usuario_id')->constrained('datos_usuarios')->onDelete('cascade');
+            $table->unsignedBigInteger('usuario_id');
             $table->string('nombres');
             $table->string('ap_paterno');
             $table->string('ap_materno');
@@ -18,13 +17,15 @@ return new class extends Migration
             $table->date('fecha_nacimiento');
             $table->string('genero');
             $table->integer('edad');
-            $table->string('carnet_control_sano'); // ruta archivo
-            $table->string('certificado_nacimiento'); // ruta archivo
+            $table->string('carnet_control_sano');
+            $table->string('certificado_nacimiento');
             $table->timestamps();
+
+            $table->foreign('usuario_id')->references('id')->on('datos_usuarios')->onDelete('cascade');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('menores');
     }
