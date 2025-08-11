@@ -3,11 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InscripcionController;
 use App\Http\Controllers\MenorController;
+use App\Http\Controllers\AdminExportController; // <-- Importa el controlador de exportación
 
 /*
-|--------------------------------------------------------------------------
-| Rutas públicas (Formulario y bienvenida)
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
+| Rutas públicas (Formulario y bienvenida) 
+|-------------------------------------------------------------------------- 
 */
 
 // Página de bienvenida
@@ -35,9 +36,9 @@ Route::get('/despedida/{usuario?}', [InscripcionController::class, 'despedida'])
     ->name('inscripcion.despedida');
 
 /*
-|--------------------------------------------------------------------------
-| Rutas de administración (CRUD) sin autenticación
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
+| Rutas de administración (CRUD) sin autenticación 
+|-------------------------------------------------------------------------- 
 */
 
 Route::prefix('admin')->group(function () {
@@ -55,4 +56,5 @@ Route::prefix('admin')->group(function () {
 
     Route::delete('/menores/{menor}', [MenorController::class, 'destroy'])
         ->name('menores.destroy');
+
 });

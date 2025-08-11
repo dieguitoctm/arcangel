@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\DatosUsuario;
 use App\Models\Embarazada;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\UsuariosMenoresExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InscripcionController extends Controller
 {
@@ -153,4 +155,9 @@ class InscripcionController extends Controller
 
         return view('despedida', compact('usuario', 'cantidadMenores'));
     }
+    public function exportExcel()
+    {
+        return Excel::download(new UsuariosMenoresExport, 'usuarios_menores.xlsx');
+    }
 }
+

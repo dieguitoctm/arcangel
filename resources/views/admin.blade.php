@@ -4,7 +4,30 @@
 
 @section('content')
 
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+<style>
+  /* Colores personalizados para DataTables */
+  table.dataTable thead {
+    background-color: #343a40 !important; /* color oscuro */
+    color: #fff;
+  }
+  table.dataTable tbody tr:hover {
+    background-color: #cfe2ff !important; /* azul claro al pasar mouse */
+  }
+  .dt-button.buttons-excel {
+    background-color: #198754 !important; /* verde */
+    color: white !important;
+  }
+  .dt-button.buttons-pdf {
+    background-color: #dc3545 !important; /* rojo */
+    color: white !important;
+  }
+</style>
 
 <div class="container py-4">
 
@@ -13,10 +36,10 @@
   @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
   @endif
-
+  
   <div class="table-responsive mb-3">
     <!-- Tabla Usuarios -->
-    <table class="table table-striped table-hover align-middle">
+    <table id="usuariosTable" class="table table-striped table-hover align-middle" style="width:100%">
       <thead class="table-dark">
         <tr>
           <th>Nombres</th>
@@ -88,7 +111,7 @@
 
     @if($usuario->menores->count() > 0)
     <div class="table-responsive mb-4">
-      <table class="table table-bordered align-middle">
+      <table id="menoresTable_{{ $usuario->id }}" class="table table-bordered align-middle" style="width:100%">
         <thead class="table-secondary">
           <tr>
             <th>Nombres</th>
@@ -151,7 +174,6 @@
 
     <hr>
   @endforeach
-
 
   <!-- Modal Editar Usuario -->
   <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
@@ -400,9 +422,67 @@
 
 </div>
 
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+<!-- DataTables Buttons -->
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+<!-- JSZip y pdfmake para exportar Excel y PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Usuario: Validación y edición
+
+    // Inicializar DataTables para tabla usuarios con export buttons
+    $('#usuariosTable').DataTable({
+      dom: 'Bfrtip',
+      buttons: [
+        {
+          extend: 'excelHtml5',
+          text: 'Exportar Excel',
+          className: 'btn btn-success'
+        },
+        {
+          extend: 'pdfHtml5',
+          text: 'Exportar PDF',
+          className: 'btn btn-danger'
+        }
+      ],
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-CL.json'
+      }
+    });
+
+    // Inicializar DataTables para cada tabla menores (una por tutor)
+    @foreach($usuarios as $usuario)
+      $('#menoresTable_{{ $usuario->id }}').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+          {
+            extend: 'excelHtml5',
+            text: 'Exportar Excel',
+            className: 'btn btn-success'
+          },
+          {
+            extend: 'pdfHtml5',
+            text: 'Exportar PDF',
+            className: 'btn btn-danger'
+          }
+        ],
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-CL.json'
+        }
+      });
+    @endforeach
+
+    // --- Código para editar y eliminar usuarios ---
     const editarModal = document.getElementById('editarModal');
     const formEditar = document.getElementById('formEditar');
 
@@ -436,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function () {
         formEditar.classList.remove('was-validated');
     });
 
-    // Usuario: Confirmación eliminar
     document.querySelectorAll('.btn-eliminar').forEach(button => {
         button.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
@@ -454,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Menor: Validación y edición
+    // --- Código para editar y eliminar menores ---
     const editarMenorModal = document.getElementById('editarMenorModal');
     const formEditarMenor = document.getElementById('formEditarMenor');
 
@@ -488,7 +567,6 @@ document.addEventListener('DOMContentLoaded', function () {
         formEditarMenor.classList.remove('was-validated');
     });
 
-    // Menor: Confirmación eliminar
     document.querySelectorAll('.btn-eliminar-menor').forEach(button => {
         button.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
@@ -505,6 +583,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
 });
 </script>
 
