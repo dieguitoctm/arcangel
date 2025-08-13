@@ -36,31 +36,18 @@
     }
 
     /* Validación: mensajes ocultos por defecto */
-    .invalid-feedback {
-        display: none;
-        color: #dc3545;
-        font-size: 0.875em;
-    }
-    .valid-feedback {
-        display: none;
-        color: #198754;
-        font-size: 0.875em;
-    }
+    .invalid-feedback { display: none; color: #dc3545; font-size: 0.875em; }
+    .valid-feedback { display: none; color: #198754; font-size: 0.875em; }
 
     /* Mostrar mensajes solo tras validación */
     .was-validated select:invalid ~ .invalid-feedback,
     .was-validated select:valid ~ .valid-feedback,
     .was-validated input:invalid ~ .invalid-feedback,
-    .was-validated input:valid ~ .valid-feedback {
-        display: block;
-    }
+    .was-validated input:valid ~ .valid-feedback { display: block; }
 
     /* Estilos para inputs válidos e inválidos */
     .was-validated select:invalid, 
-    .was-validated input:invalid {
-        border-color: #dc3545;
-        background-image: none;
-    }
+    .was-validated input:invalid { border-color: #dc3545; background-image: none; }
     .was-validated select:valid,
     .was-validated input:valid {
         border-color: #198754;
@@ -68,6 +55,14 @@
         background-repeat: no-repeat;
         background-position: right calc(0.375em + 0.1875rem) center;
         background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    /* Precarga de archivos */
+    .file-loading {
+        font-size: 0.9rem;
+        color: #555;
+        margin-top: 5px;
+        display: none;
     }
 </style>
 
@@ -151,6 +146,7 @@
                         <label for="registro_social" class="form-label">Registro Social de Hogares</label>
                         <input type="file" class="form-control" id="registro_social" name="registro_social"
                                accept=".pdf,.jpg,.png" required>
+                        <div class="file-loading" id="registro_social_loading">Cargando archivo...</div>
                         <div class="invalid-feedback">Debe subir un archivo válido (PDF/JPG/PNG).</div>
                         <div class="valid-feedback">¡Perfecto!</div>
                     </div>
@@ -183,6 +179,7 @@
                             <label for="carnet_gestacion" class="form-label">Carnet de Gestación</label>
                             <input type="file" class="form-control" id="carnet_gestacion"
                                    name="carnet_gestacion" accept=".pdf,.jpg,.png" disabled>
+                            <div class="file-loading" id="carnet_gestacion_loading">Cargando archivo...</div>
                         </div>
                     </div>
 
@@ -193,7 +190,7 @@
     </div>
 </div>
 
-{{-- Scripts para validaciones interactivas --}}
+{{-- Scripts para validaciones interactivas y precarga de archivos --}}
 <script src="https://cdn.jsdelivr.net/npm/rut.js@1.0.2/dist/rut.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -206,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const rutError = document.getElementById('rut-error');
     const telefono = document.getElementById('telefono');
 
-    // Cambio automático de fondo
+    // Fondo automático
     const fondos = [
         '{{ asset("img/fondo1.jpg") }}',
         '{{ asset("img/fondo2.jpg") }}',
@@ -218,15 +215,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.backgroundImage = `url('${fondos[fondoIndex]}')`;
     }, 5000);
 
-    // Teléfono: evitar borrar +569 y solo números después
+    // Teléfono
     telefono.addEventListener('input', function() {
-        if (!this.value.startsWith('+569')) {
-            this.value = '+569';
-        }
+        if (!this.value.startsWith('+569')) this.value = '+569';
         this.value = this.value.replace(/(?!^\+569)\D/g, '');
     });
 
-    // Solo letras para nombres y apellidos
+    // Nombres y apellidos solo letras
     ['nombres', 'ap_paterno', 'ap_materno'].forEach(id => {
         document.getElementById(id).addEventListener('input', function() {
             this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
@@ -248,26 +243,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Validación y formato RUT
+    // Validación RUT
     rutInput.addEventListener('input', function () {
         let clean = this.value.replace(/[^0-9kK]/g, '');
         if (clean.length > 1) {
             clean = clean.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + clean.slice(-1);
         }
         this.value = clean;
-
         if (RUT.isValid(this.value)) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-            rutError.style.display = 'none';
+            this.classList.remove('is-invalid'); this.classList.add('is-valid'); rutError.style.display = 'none';
         } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-            rutError.style.display = 'block';
+            this.classList.remove('is-valid'); this.classList.add('is-invalid'); rutError.style.display = 'block';
         }
     });
 
-    // Validación general Bootstrap
+    // Validación general
     form.addEventListener('submit', function (event) {
         if (!form.checkValidity()) {
             event.preventDefault();
@@ -275,6 +265,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         form.classList.add('was-validated');
     });
+
+    // === Precarga de archivos ===
+    function handleFilePreload(input, loaderId) {
+        const loader = document.getElementById(loaderId);
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                loader.style.display = 'inline-block';
+                // Simular carga corta
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }
+        });
+    }
+
+    handleFilePreload(document.getElementById('registro_social'), 'registro_social_loading');
+    handleFilePreload(document.getElementById('carnet_gestacion'), 'carnet_gestacion_loading');
 });
 </script>
 @endsection

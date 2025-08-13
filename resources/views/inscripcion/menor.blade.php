@@ -78,25 +78,29 @@
             }
         }
 
-        /* Validación: mensajes ocultos por defecto */
         .invalid-feedback {
             display: none;
             color: #dc3545;
             font-size: 0.875em;
         }
 
-        /* Mostrar mensajes solo tras validación */
         .was-validated .form-control:invalid ~ .invalid-feedback,
         .was-validated .form-select:invalid ~ .invalid-feedback {
             display: block;
         }
 
-        /* Borde rojo solo si inválido y validado */
         .was-validated .form-control:invalid {
             border-color: #dc3545;
         }
 
         #form-menor {
+            display: none;
+        }
+
+        .file-loading {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 5px;
             display: none;
         }
     </style>
@@ -187,6 +191,7 @@
                     <label for="carnet_control_sano" class="form-label">Carnet de Control de Salud (PDF/JPG/PNG)</label>
                     <input type="file" name="carnet_control_sano" id="carnet_control_sano" class="form-control"
                         accept=".pdf,.jpg,.png" required>
+                    <div class="file-loading" id="carnet_control_sano_loading">Cargando archivo...</div>
                     <div class="invalid-feedback">Debe subir un archivo válido (PDF/JPG/PNG).</div>
                 </div>
 
@@ -194,6 +199,7 @@
                     <label for="certificado_nacimiento" class="form-label">Certificado de Nacimiento (PDF/JPG/PNG)</label>
                     <input type="file" name="certificado_nacimiento" id="certificado_nacimiento" class="form-control"
                         accept=".pdf,.jpg,.png" required>
+                    <div class="file-loading" id="certificado_nacimiento_loading">Cargando archivo...</div>
                     <div class="invalid-feedback">Debe subir un archivo válido (PDF/JPG/PNG).</div>
                 </div>
 
@@ -255,7 +261,7 @@
             bloquearNumeros(document.getElementById('ap_paterno'));
             bloquearNumeros(document.getElementById('ap_materno'));
 
-            // Validación bootstrap custom para campos con fecha dentro de rango
+            // Validación fecha
             form.addEventListener('submit', function (event) {
                 const minDate = new Date(fechaNacimiento.min);
                 const maxDate = new Date(fechaNacimiento.max);
@@ -273,6 +279,23 @@
                 }
                 form.classList.add('was-validated');
             });
+
+            // === Precarga de archivos ===
+            function handleFilePreload(inputId, loaderId) {
+                const input = document.getElementById(inputId);
+                const loader = document.getElementById(loaderId);
+                input.addEventListener('change', () => {
+                    if (input.files.length > 0) {
+                        loader.style.display = 'inline-block';
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                        }, 1000); // simula carga
+                    }
+                });
+            }
+
+            handleFilePreload('carnet_control_sano', 'carnet_control_sano_loading');
+            handleFilePreload('certificado_nacimiento', 'certificado_nacimiento_loading');
         });
     </script>
 @endsection
