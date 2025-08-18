@@ -1,14 +1,21 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\InscripcionController;
 use App\Http\Controllers\MenorController;
 use App\Http\Controllers\AdminExportController; // <-- Importa el controlador de exportación
 
 /*
-|-------------------------------------------------------------------------- 
-| Rutas públicas (Formulario y bienvenida) 
-|-------------------------------------------------------------------------- 
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
 */
 
 // Página de bienvenida
@@ -34,14 +41,16 @@ Route::post('/menor/{usuario}', [MenorController::class, 'guardar'])
 // Página de despedida, parámetro usuario opcional
 Route::get('/despedida/{usuario?}', [InscripcionController::class, 'despedida'])
     ->name('inscripcion.despedida');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-/*
-|-------------------------------------------------------------------------- 
-| Rutas de administración (CRUD) sin autenticación 
-|-------------------------------------------------------------------------- 
-*/
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->group(function () {
     Route::get('/', [InscripcionController::class, 'index'])
         ->name('admin.index');
 
@@ -58,3 +67,9 @@ Route::prefix('admin')->group(function () {
         ->name('menores.destroy');
 
 });
+
+
+    
+});
+
+require __DIR__.'/auth.php';

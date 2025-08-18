@@ -7,70 +7,87 @@
     body {
         background: url('{{ asset("img/fondo1.jpg") }}') center/cover fixed no-repeat;
         transition: background-image 1s ease-in-out;
+        margin: 0;
+        padding: 0;
     }
     .form-wrapper {
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(8px);
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        animation: fadeInUp 0.7s ease;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        padding: 1.5rem;
+        border-radius: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
     }
     .form-title {
         font-weight: bold;
         color: #28a745;
-        font-size: 1.8rem;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .form-control, .form-select {
+        font-size: 1.1rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        border: 2px solid #ddd;
+        border-radius: 0.5rem;
     }
     .btn-success {
         background: linear-gradient(45deg, #28a745, #34ce57);
         border: none;
-        transition: all 0.3s ease;
+        padding: 1.2rem;
+        font-size: 1.3rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
     }
-    .btn-success:hover {
-        background: linear-gradient(45deg, #218838, #28a745);
-        transform: scale(1.02);
-    }
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Validación: mensajes ocultos por defecto */
-    .invalid-feedback { display: none; color: #dc3545; font-size: 0.875em; }
-    .valid-feedback { display: none; color: #198754; font-size: 0.875em; }
-
-    /* Mostrar mensajes solo tras validación */
-    .was-validated select:invalid ~ .invalid-feedback,
-    .was-validated select:valid ~ .valid-feedback,
-    .was-validated input:invalid ~ .invalid-feedback,
-    .was-validated input:valid ~ .valid-feedback { display: block; }
-
-    /* Estilos para inputs válidos e inválidos */
-    .was-validated select:invalid, 
-    .was-validated input:invalid { border-color: #dc3545; background-image: none; }
-    .was-validated select:valid,
-    .was-validated input:valid {
-        border-color: #198754;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23198754' viewBox='0 0 8 8'%3e%3cpath d='M6.564 1.75L3.25 5.064 1.436 3.25 0 4.686l3.25 3.25 5-5z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right calc(0.375em + 0.1875rem) center;
-        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    .invalid-feedback, .valid-feedback {
+        font-size: 1rem;
+        margin-top: -1rem;
+        margin-bottom: 1rem;
     }
 
-    /* Precarga de archivos */
-    .file-loading {
-        font-size: 0.9rem;
-        color: #555;
-        margin-top: 5px;
-        display: none;
+    /* Estilos para móviles pequeños */
+    @media (max-width: 576px) {
+        .form-title {
+            font-size: 1.8rem;
+        }
+        .form-label {
+            font-size: 1.1rem;
+        }
+        .form-control, .form-select {
+            font-size: 1rem;
+            padding: 0.8rem;
+        }
+        .btn-success {
+            padding: 1rem;
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Estilos para pantallas más grandes (tablets/desktop) */
+    @media (min-width: 768px) {
+        .form-wrapper {
+            max-width: 600px;
+            margin: 2rem auto;
+            min-height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.3);
+        }
     }
 </style>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col-12">
             <div class="form-wrapper">
-                <h1 class="mb-4 text-center form-title">🎄 Formulario de Inscripción</h1>
+                <h1 class="text-center form-title">🎄 Formulario de Inscripción</h1>
 
                 @if ($errors->any())
                 <div class="alert alert-danger">
@@ -85,74 +102,56 @@
                 <form method="POST" action="{{ route('inscripcion.guardar') }}" enctype="multipart/form-data" novalidate id="form-inscripcion">
                     @csrf
 
-                    {{-- NOMBRES --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="nombres" class="form-label">Nombres</label>
                         <input type="text" class="form-control" id="nombres" name="nombres"
                                value="{{ old('nombres') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
                         <div class="invalid-feedback">Ingrese un nombre válido (solo letras).</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- APELLIDO PATERNO --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="ap_paterno" class="form-label">Apellido Paterno</label>
                         <input type="text" class="form-control" id="ap_paterno" name="ap_paterno"
                                value="{{ old('ap_paterno') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
                         <div class="invalid-feedback">Ingrese un apellido válido (solo letras).</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- APELLIDO MATERNO --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="ap_materno" class="form-label">Apellido Materno</label>
                         <input type="text" class="form-control" id="ap_materno" name="ap_materno"
                                value="{{ old('ap_materno') }}" minlength="2" maxlength="50" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$">
                         <div class="invalid-feedback">Ingrese un apellido válido (solo letras).</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- TELÉFONO --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="telefono" class="form-label">Teléfono (+569XXXXXXXX)</label>
                         <input type="tel" class="form-control" id="telefono" name="telefono"
                                value="{{ old('telefono', '+569') }}" minlength="12" maxlength="12" required pattern="^\+569\d{8}$">
                         <div class="invalid-feedback">Ingrese un teléfono válido en formato +569XXXXXXXX.</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- DIRECCIÓN --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="direccion" class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="direccion" name="direccion"
                                value="{{ old('direccion') }}" maxlength="50" required>
                         <div class="invalid-feedback">Ingrese una dirección (máximo 50 caracteres).</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- RUT --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="rut" class="form-label">RUT (Ej: 12.345.678-9)</label>
                         <input type="text" class="form-control" id="rut" name="rut"
                                value="{{ old('rut') }}" maxlength="12" required>
-                        <div class="invalid-feedback" id="rut-error" style="display:none;">
-                            RUT inválido. Revise el formato y dígito verificador.
-                        </div>
-                        <div class="valid-feedback">¡Perfecto!</div>
+                        <div class="invalid-feedback" id="rut-error">RUT inválido. Revise el formato y dígito verificador.</div>
                     </div>
 
-                    {{-- REGISTRO SOCIAL --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="registro_social" class="form-label">Registro Social de Hogares</label>
                         <input type="file" class="form-control" id="registro_social" name="registro_social"
                                accept=".pdf,.jpg,.png" required>
-                        <div class="file-loading" id="registro_social_loading">Cargando archivo...</div>
                         <div class="invalid-feedback">Debe subir un archivo válido (PDF/JPG/PNG).</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- ¿Está embarazada? --}}
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="embarazada" class="form-label">¿Está embarazada o solo desea agregar un niño?</label>
                         <select class="form-select" name="embarazada" id="embarazada" required>
                             <option value="" disabled selected>Seleccione</option>
@@ -160,12 +159,10 @@
                             <option value="no">No, solo deseo inscribir un niño.</option>
                         </select>
                         <div class="invalid-feedback">Por favor, seleccione una opción.</div>
-                        <div class="valid-feedback">¡Perfecto!</div>
                     </div>
 
-                    {{-- DATOS GESTACIÓN --}}
                     <div id="datos-embarazo" style="display:none;">
-                        <div class="mb-3">
+                        <div class="form-group">
                             <label for="meses_gestacion" class="form-label">Meses de Gestación</label>
                             <select class="form-select" id="meses_gestacion" name="meses_gestacion" disabled>
                                 <option value="" disabled selected>Seleccione</option>
@@ -175,11 +172,10 @@
                             </select>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="form-group">
                             <label for="carnet_gestacion" class="form-label">Carnet de Gestación</label>
                             <input type="file" class="form-control" id="carnet_gestacion"
                                    name="carnet_gestacion" accept=".pdf,.jpg,.png" disabled>
-                            <div class="file-loading" id="carnet_gestacion_loading">Cargando archivo...</div>
                         </div>
                     </div>
 
@@ -189,6 +185,7 @@
         </div>
     </div>
 </div>
+
 
 {{-- Scripts para validaciones interactivas y precarga de archivos --}}
 <script src="https://cdn.jsdelivr.net/npm/rut.js@1.0.2/dist/rut.min.js"></script>
